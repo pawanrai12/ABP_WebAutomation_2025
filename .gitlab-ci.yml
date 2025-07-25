@@ -1,0 +1,37 @@
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: never  # Prevent pipeline run for push event    
+    - when: always
+
+variables:
+  EXECUTION_TAGS:
+    value: ""
+    description: "Specific tags to execute the test. For example- TC1"
+  BROWSER:
+    value: ""
+    description: "Test your website on multiple browsers. Examples: chrome, firefox, edge, safari"
+  PARALLEL:
+    value: "no"
+    options:
+      - "yes"
+      - "no"
+    description: "Run your tests parallely"
+  EMAIL_RECIPIENTS:
+    value: ""
+    description: "Mention the email address to receive automation report"
+
+stages:
+  - test
+
+job_test:
+  tags:
+    - AzWin10CoE03
+  allow_failure: false
+  stage: test
+  script:
+    - mvn clean test
+  artifacts:
+    paths:
+      - Results/
+    

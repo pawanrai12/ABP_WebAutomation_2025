@@ -1,0 +1,9 @@
+/target/
+.classpath
+/Results/
+.settings/
+.project
+/test-output/
+/testresult/
+.idea/
+qualiframe-maven-testng.iml
