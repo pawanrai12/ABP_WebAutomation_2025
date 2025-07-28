@@ -36,8 +36,8 @@ public class Bagging_UnbaggingSteps extends Bagging_UnbaggingPage
     //Verify Storage Area and Complete Vessel Visit
     //Step 40.1
     @When("the user navigate to Operations Storage Area")
-    public void theUserNavigateToOperationsStorageArea() throws InterruptedException {
-        add_BaggingDetails();
+    public void theUserNavigateToOperationsStorageArea() throws InterruptedException
+    {
         UserNavigatesToCargoStorageAreas();
     }
     //Step 40.2
