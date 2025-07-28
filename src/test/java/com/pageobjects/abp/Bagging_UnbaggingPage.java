@@ -15,8 +15,8 @@ public class Bagging_UnbaggingPage extends WebReusableComponents
     protected By addBtnBlending = By.xpath("(//button/span[text()='Add'])[1]");
 
     protected By Selectbagging = By.xpath("//span[@aria-label='Select Product to Bag']");
-
     protected By SelectUnbagging = By.xpath("//span[@aria-label='Select Product to Unbag']");
+
     protected By SelectbaggingType = By.xpath("//span[@aria-label='Select Bagging Type']");
 
     protected By SelectconsignmentstockDrpdwn = By.xpath("(//span[@aria-label='Select Consignment Stock'])[1]");
@@ -27,6 +27,8 @@ public class Bagging_UnbaggingPage extends WebReusableComponents
 
     protected By numberofbagsInput = By.xpath("//input[@aria-label='Number of Bags']");
     protected By saveNexecute = By.xpath("//button[@aria-label='Save & Execute']");
+    protected By yesBtn = By.xpath("//button[@aria-label='Yes']");
+
     protected By CompletedUnBagging = By.xpath("//span[text()='Completed/Cancelled Unbagging Jobs']");
     protected By CompletedBagging = By.xpath("//span[text()='Completed/Cancelled Bagging Jobs']");
 
@@ -39,8 +41,6 @@ public class Bagging_UnbaggingPage extends WebReusableComponents
         clickElement(BagginggBtn);
         Thread.sleep(2000);
 
-        //clickElement(CompletedBagging);
-        //Thread.sleep(2000);
     }
     protected void add_BaggingDetails() throws InterruptedException {
         clickElement(addBtnBlending);
@@ -74,13 +74,19 @@ public class Bagging_UnbaggingPage extends WebReusableComponents
         clickElement(SelectArea2);
         Thread.sleep(2000);
 
-
-
         clickElement(saveNexecute);
+        Thread.sleep(2000);
+
+        clickElement(yesBtn);
+        Thread.sleep(2000);
+
+        clickElement(CompletedBagging);
+        Thread.sleep(5000);
+
     }
 
-
-    protected void Selecting_UnBaggingMenu() throws InterruptedException {
+    protected void Selecting_UnBaggingMenu() throws InterruptedException
+    {
         setZoomLevel(50);
         clickElement(operationMenu);
         Thread.sleep(2000);
@@ -88,22 +94,48 @@ public class Bagging_UnbaggingPage extends WebReusableComponents
         clickElement(UnbaggingBtn);
         Thread.sleep(2000);
 
-        clickElement(CompletedUnBagging);
-        Thread.sleep(2000);
     }
-    protected void add_UnbaggingDetails() throws InterruptedException {
+    protected void add_UnbaggingDetails() throws InterruptedException
+    {
         clickElement(addBtnBlending);
         Thread.sleep(2000);
 
-        selectDropdownDD(SelectUnbagging,"text","d");
+        selectDropdownDD(SelectUnbagging,"text","Ammonium Sulphate");
         Thread.sleep(2000);
 
-        //clickElement(BagginggBtn);
+        selectDropdownDD(SelectbaggingType,"text","1000kg - Bag");
+        Thread.sleep(2000);
+
+        selectDropdownDD(SelectconsignmentstockDrpdwn,"text","USRN-1000314");
+        Thread.sleep(2000);
+
+        clickElement(SelectstorageareaDrpdwn);
+        Thread.sleep(2000);
+        clickElement(SelectArea1);
+        Thread.sleep(2000);
+        clickElement(SelectArea2);
         Thread.sleep(2000);
 
         enterText(numberofbagsInput,"5");
 
+        //selecting the consignmnet 313 automatically in Unbagging Process -so removed
+
+        clickElement(SelectstorageareaDrpdwn);
+        Thread.sleep(2000);
+        clickElement(SelectArea1);
+        Thread.sleep(2000);
+        clickElement(SelectArea2);
+        Thread.sleep(2000);
+
         clickElement(saveNexecute);
+        Thread.sleep(2000);
+
+        clickElement(yesBtn);
+        Thread.sleep(2000);
+
+        clickElement(CompletedUnBagging);
+        Thread.sleep(5000);
+
     }
 
     //Step 40
@@ -178,12 +210,12 @@ public class Bagging_UnbaggingPage extends WebReusableComponents
         Thread.sleep(2000);
 
         //***Entering Area Name and applying filter
-        enterText(areainput,"BLENDING-GR");
+        enterText(areainput,"1000KG- BAGS");
         Thread.sleep(2000);
         clickElement(applyfilterBtn);
         Thread.sleep(2000);
 
-        clickOnTableElementByValue("BLENDING-GR",TableBlendValue);
+        clickOnTableElementByValue("1000KG- BAGS",TableBlendValue);
 
         Thread.sleep(2000);
         clickElement(viewcontentsBtn);

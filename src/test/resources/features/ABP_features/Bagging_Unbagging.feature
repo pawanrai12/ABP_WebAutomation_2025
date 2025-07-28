@@ -8,6 +8,19 @@ Feature: Bagging_Unbagging Steps (Review)
     And User has logged in with valid credentials
     Then CommTrac application Home page should be displayed
 
+    # Step 40 --Verifying Before
+#    When the user navigate to Operations Storage Area
+#    And select the Storage Area
+#    Then all discharged product should be displayed in Storage Areas
+
+    # Step Bagging
+#    When the user navigate to Operations Bagging
+#    Then Bagging Process starts
+
+     # Step UnBagging
+    When the user navigate to Operations UnBagging
+    Then UnBagging Process starts
+
     # Step 40 --Verifying After
     When the user navigate to Operations Storage Area
     And select the Storage Area
@@ -15,4 +28,4 @@ Feature: Bagging_Unbagging Steps (Review)
 
     Examples:
       | tc_id |
-      | 12A |
+      | 11A |
