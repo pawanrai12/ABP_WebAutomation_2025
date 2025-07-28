@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
 //import java.util.concurrent.TimeUnit;
 import java.time.LocalDateTime;
 
+import org.junit.Assert;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -364,10 +365,12 @@ public abstract class WebReusableComponents extends GenericResuableComponents {
 	 * @param by               The {@link WebDriver} locator used to identify the
 	 *                         element
 	 * @param timeOutInSeconds The wait timeout in seconds
+	 * @return
 	 */
-	public void waitUntilElementVisible(By by, long timeOutInSeconds) {
+	public WebElement waitUntilElementVisible(By by, long timeOutInSeconds) {
 
 		(new WebDriverWait(driver, Duration.ofSeconds(timeOutInSeconds))).until(ExpectedConditions.visibilityOfElementLocated(by));
+		return null;
 	}
 
 	/**
@@ -376,10 +379,12 @@ public abstract class WebReusableComponents extends GenericResuableComponents {
 	 * @param by               The {@link WebDriver} locator used to identify the
 	 *                         element
 	 * @param timeOutInSeconds The wait timeout in seconds
+	 * @return
 	 */
-	public void waitUntilElementClickable(By by, long timeOutInSeconds) {
+	public WebElement waitUntilElementClickable(By by, long timeOutInSeconds) {
 
 		(new WebDriverWait(driver, Duration.ofSeconds(timeOutInSeconds))).until(ExpectedConditions.elementToBeClickable(by));
+		return null;
 	}
 
 	/**
@@ -1144,7 +1149,7 @@ public abstract class WebReusableComponents extends GenericResuableComponents {
 	//OLD One
 	//Custom Dropdown for All other than -select class
 
-	public void selectDropdownDD(By dropdownLocator, String selectionType, String selectionValue) {
+	public void selectDropdownDDD(By dropdownLocator, String selectionType, String selectionValue) {
 		try {
 			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
 
@@ -1194,7 +1199,10 @@ public abstract class WebReusableComponents extends GenericResuableComponents {
 						By.xpath(String.format("//li[@class='p-dropdown-item' and normalize-space(text())='%s']", selectionValue)),
 
 						// Strategy 4: Contains text (more flexible)
-						By.xpath(String.format("//li[@class='p-dropdown-item' and contains(text(),'%s')]", selectionValue))
+						By.xpath(String.format("//li[@class='p-dropdown-item' and contains(text(),'%s')]", selectionValue)),
+
+						// Strategy 5: Contains text (more flexible)
+						By.xpath(String.format("//li[@role='option' and @aria-label='%s']", selectionValue))
 				};
 
 				WebElement desiredOption = null;
@@ -1206,34 +1214,42 @@ public abstract class WebReusableComponents extends GenericResuableComponents {
 						System.out.println("Trying locator strategy " + (i + 1) + ": " + optionLocators[i].toString());
 
 						// Use shorter wait for each attempt - 3 seconds instead of 15
-						WebDriverWait Wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-						desiredOption = Wait.until(ExpectedConditions.elementToBeClickable(optionLocators[i]));
+						WebDriverWait shortWait1 = new WebDriverWait(driver, Duration.ofSeconds(8));
+						shortWait1.until(ExpectedConditions.visibilityOfElementLocated(optionLocators[i]));
 
-						System.out.println("Success with strategy " + (i + 1));
-						break;
+						// Scroll into view and click
+						List<WebElement> matchingOptions = driver.findElements(optionLocators[i]);
+						if (matchingOptions.size() > 0) {
+							WebElement freshOption = matchingOptions.get(0); // Always re-fetch the element fresh
+
+							((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", freshOption);
+							Thread.sleep(250); // Let the scroll finish
+
+							try {
+								freshOption.click(); // First try native click
+							} catch (StaleElementReferenceException | ElementClickInterceptedException stale) {
+								// In case it went stale again, try to refetch
+								System.out.println("Retrying due to stale element...");
+								WebElement retryOption = driver.findElements(optionLocators[i]).get(0);
+								((JavascriptExecutor) driver).executeScript("arguments[0].click();", retryOption);
+							}
+							desiredOption = freshOption;  // <-- Add this line!
+
+							System.out.println("Success with strategy " + (i + 1));
+							break;
+						}
+
 					} catch (Exception e) {
 						lastException = e;
 						System.out.println("Strategy " + (i + 1) + " failed: " + e.getMessage());
 						continue;
 					}
 				}
-
 				if (desiredOption != null) {
-					// Scroll into view if needed
-					((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", desiredOption);
-					Thread.sleep(200);
-
-					// Try to click
-					try {
-						desiredOption.click();
-					} catch (Exception e) {
-						// If regular click fails, try JavaScript click
-						((JavascriptExecutor) driver).executeScript("arguments[0].click();", desiredOption);
-					}
-
 					addTestLog("Custom Dropdown Selection", "Selected custom dropdown item [" + selectionValue + "]", Status.PASS);
 				} else {
 					throw lastException != null ? lastException : new Exception("Could not locate dropdown option with any strategy");
+
 				}
 			}
 		} catch (Exception e) {
@@ -1355,6 +1371,9 @@ public abstract class WebReusableComponents extends GenericResuableComponents {
 		//action.moveToElement(option).click().build().perform();
 		addTestLog("Select Option", "selected Option [" + value + "] from [" + by + "}", Status.PASS);
 	}
+
+
+
 	/**
 	 * Function to Select the value by value
 	 *
@@ -2048,6 +2067,115 @@ public void shadowClickField(String element) {
 			System.out.println(error);
 			//addTestLog(error);
 			e.printStackTrace();
+		}
+	}
+
+	public void selectDropdownDD(By dropdownLocator, String selectionType, String selectionValue) {
+		try {
+			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+
+			// Wait for dropdown to be clickable
+			wait.until(ExpectedConditions.elementToBeClickable(dropdownLocator));
+			WebElement dropdownElement = driver.findElement(dropdownLocator);
+			String tagName = dropdownElement.getTagName();
+
+			if ("select".equalsIgnoreCase(tagName)) {
+				// Standard <select>
+				Select select = new Select(dropdownElement);
+				switch (selectionType.toLowerCase()) {
+					case "value":
+						select.selectByValue(selectionValue);
+						break;
+					case "text":
+						select.selectByVisibleText(selectionValue);
+						break;
+					case "index":
+						select.selectByIndex(Integer.parseInt(selectionValue));
+						break;
+					default:
+						throw new IllegalArgumentException("Invalid selection type: " + selectionType);
+				}
+				addTestLog("Dropdown Selection", "Selected from standard dropdown using [" + selectionType + "] = " + selectionValue, Status.PASS);
+			} else {
+				// Custom dropdown (PrimeNG, etc.)
+				dropdownElement.click();
+				Thread.sleep(300); // Allow dropdown to open
+
+				By dropdownContainer = By.cssSelector(".p-dropdown-items-wrapper, .p-dropdown-items");
+				new WebDriverWait(driver, Duration.ofSeconds(5)).until(ExpectedConditions.presenceOfElementLocated(dropdownContainer));
+
+				By[] optionLocators = {
+						// Strategy 1: aria-label exact match (promoted from strategy 5)
+						By.xpath(String.format("//li[@role='option' and @aria-label='%s']", selectionValue)),
+
+						// Strategy 2: contains aria-label
+						By.xpath(String.format("//li[@class='p-dropdown-item' and contains(@aria-label,'%s')]", selectionValue.split(" \\(")[0])),
+
+						// Strategy 3: full aria-label match
+						By.xpath(String.format("//li[@class='p-dropdown-item' and @aria-label='%s']", selectionValue)),
+
+						// Strategy 4: normalize-space text match
+						By.xpath(String.format("//li[@class='p-dropdown-item' and normalize-space(text())='%s']", selectionValue)),
+
+						// Strategy 5: contains text
+						By.xpath(String.format("//li[@class='p-dropdown-item' and contains(text(),'%s')]", selectionValue))
+				};
+
+				WebElement desiredOption = null;
+				Exception lastException = null;
+
+				for (int i = 0; i < optionLocators.length; i++) {
+					try {
+						System.out.println("Trying locator strategy " + (i + 1) + ": " + optionLocators[i]);
+
+						List<WebElement> matchingOptions = driver.findElements(optionLocators[i]);
+
+						for (WebElement option : matchingOptions) {
+							if (option.isDisplayed() && option.isEnabled()) {
+								((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", option);
+								Thread.sleep(250);
+
+								try {
+									option.click();
+								} catch (StaleElementReferenceException | ElementClickInterceptedException stale) {
+									System.out.println("Retrying due to stale element...");
+									WebElement retryOption = driver.findElements(optionLocators[i]).get(0);
+									((JavascriptExecutor) driver).executeScript("arguments[0].click();", retryOption);
+								}
+
+								System.out.println("Success with strategy " + (i + 1));
+								addTestLog("Custom Dropdown Selection", "Selected custom dropdown item using strategy " + (i + 1) + ": [" + selectionValue + "]", Status.PASS);
+								return; // Exit once selected
+							}
+						}
+					} catch (Exception e) {
+						lastException = e;
+						System.out.println("Strategy " + (i + 1) + " failed: " + e.getMessage());
+					}
+				}
+
+				// If none worked, throw last exception
+				throw lastException != null ? lastException : new Exception("Could not locate dropdown option with any strategy.");
+			}
+
+		} catch (Exception e) {
+			String message = "Failed to select dropdown value [" + selectionValue + "] using [" + selectionType + "]. Error: " + e.getMessage();
+			System.out.println(message);
+
+			// Print available dropdown options for debug
+			try {
+				System.out.println("Available dropdown options:");
+				List<WebElement> allOptions = driver.findElements(By.cssSelector(".p-dropdown-item"));
+				for (int i = 0; i < allOptions.size(); i++) {
+					WebElement option = allOptions.get(i);
+					System.out.println("Option " + i + ": Text='" + option.getText() + "', aria-label='" + option.getAttribute("aria-label") + "'");
+				}
+			} catch (Exception debugEx) {
+				System.out.println("Could not retrieve debug information: " + debugEx.getMessage());
+			}
+
+			addTestLog("Dropdown Selection", message, Status.FAIL);
+			logDropdownFailure(dropdownLocator, e);
 		}
 	}
 

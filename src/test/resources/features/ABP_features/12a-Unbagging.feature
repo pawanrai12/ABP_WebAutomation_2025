@@ -1,6 +1,6 @@
 Feature: Bagging_Unbagging Steps (Review)
 
-  @Launch_Bagging
+  @Launch_12A
   Scenario Outline: Bagging_Unbagging Steps
 #    Given Use the "<tc_id>"
     Given User has Launch the App using "<tc_id>"
@@ -9,13 +9,9 @@ Feature: Bagging_Unbagging Steps (Review)
     Then CommTrac application Home page should be displayed
 
     # Step 40 --Verifying Before
-#    When the user navigate to Operations Storage Area
-#    And select the Storage Area
-#    Then all discharged product should be displayed in Storage Areas
-
-    # Step Bagging
-#    When the user navigate to Operations Bagging
-#    Then Bagging Process starts
+    When the user navigate to Operations Storage Area
+    And select the Storage Area
+    Then all discharged product should be displayed in Storage Areas
 
      # Step UnBagging
     When the user navigate to Operations UnBagging
@@ -28,4 +24,4 @@ Feature: Bagging_Unbagging Steps (Review)
 
     Examples:
       | tc_id |
-      | 11A |
+      | 12A |
