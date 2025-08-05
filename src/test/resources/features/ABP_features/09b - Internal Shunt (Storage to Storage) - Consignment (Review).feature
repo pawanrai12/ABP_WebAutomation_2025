@@ -3,10 +3,10 @@ Feature: 09b –Internal Shunt (Storage to Storage) - Consignment (Review)
   @Launch_9B
   Scenario Outline: Internal Shunt (Storage to Storage) - Consignment (Review)
     #Given Use the "<tc_id>"
-    Given Launch the Application using "<tc_id>"
-    When the user has launched the Immingham Pre Prod application
-    And the user has logged in with valid credentials
-    Then the CommTrac application home page should be displayed
+    Given User has Launch the App using "<tc_id>"
+    When User has launched the Immingham application
+    And User has logged in with valid credentials
+    Then CommTrac application Home page should be displayed
 
     # Step 40 --Verifying the AREA Storage before
     When the user navigates to Cargo Storage Area
@@ -54,6 +54,12 @@ Feature: 09b –Internal Shunt (Storage to Storage) - Consignment (Review)
     And selects the Consignment Area
     Then all discharged products should be visible in Storage Areas
 
+    # Step 41 --Verifying After Complete
+    # Making Shunt Order Complete and verifying
+    When the user navigates to Cargo Booking Shunt Order
+    And the Shunt Orders Grid should be displayed
+    Then complete the Shunt Order
+
     Examples:
-      | tc_id      |
-      | LoginTest2 |
+      | tc_id |
+      | 9B |

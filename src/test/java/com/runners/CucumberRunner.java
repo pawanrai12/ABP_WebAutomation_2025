@@ -26,11 +26,11 @@ import io.cucumber.testng.CucumberOptions;
 glue = { "com.cucumber.steps" , "com.framework.webcrawler"}, 
 //Please fill the needed tag(s) @88657049, @iOS,@Android
 //tags = "@Launch_1A or @Launch_1B or @Launch_7A or @Launch_7B or @Launch_7C or @Launch_9A or @Launch_9B or @Launch_10A or @Launch_11A or @Launch_12A",
-//tags = "@Launch_7D",
+//tags = "@Launch_New",
 //tags = "@Launch_9A or @Launch_9B",
-tags = "@Launch_Bagging",
+//tags = "@Launch_Bagging",
 //tags = "@Launch_10A or @Launch_11A or @Launch_12A",
-//tags = "@Launch_1A",
+tags = "@Launch_5A",
 
 monochrome = true,
 dryRun = false,

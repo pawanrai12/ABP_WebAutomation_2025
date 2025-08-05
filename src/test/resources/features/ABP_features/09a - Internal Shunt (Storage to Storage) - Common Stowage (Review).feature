@@ -3,10 +3,10 @@ Feature: 09a –Internal Shunt (Storage to Storage) - Common Stowage (Review)
   @Launch_9A
   Scenario Outline: Internal Shunt (Storage to Storage) - Common Stowage (Review)
 #    Given Use the "<tc_id>"
-    Given Launch the Application using "<tc_id>"
-    When the user has launched the Immingham Pre Prod application
-    And the user has logged in with valid credentials
-    Then the CommTrac application home page should be displayed
+    Given User has Launch the App using "<tc_id>"
+    When User has launched the Immingham application
+    And User has logged in with valid credentials
+    Then CommTrac application Home page should be displayed
 
     # Step 40 --Verifying Before
     When the user navigates to Cargo Storage Area
@@ -38,7 +38,7 @@ Feature: 09a –Internal Shunt (Storage to Storage) - Common Stowage (Review)
     #commenting
     Then the shunt Order Quantity pages should be displayed
 
-    #Step 34  ##***Change the ARea and Weight ****
+    #Step 34  ##***Change the ARea and Weight **** $$$
     When the user enters shunt order quantity details for 9A:
     And click on Save
     Then the order detail should be saved
@@ -56,6 +56,13 @@ Feature: 09a –Internal Shunt (Storage to Storage) - Common Stowage (Review)
     And selects the Common Stowage Area
     Then all discharged products should be visible in Storage Areas
 
+    # Step 41 --Verifying After Complete
+    # Making Shunt Order Complete and verifying
+    When the user navigates to Cargo Booking Shunt Order
+    And the Shunt Orders Grid should be displayed
+    Then complete the Shunt Order
+
+
     Examples:
-      | tc_id      |
-      | LoginTest1 |
+      | tc_id |
+      | 9A |

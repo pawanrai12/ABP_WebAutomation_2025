@@ -110,5 +110,5 @@ Feature: 07A-Inbound Truck Delivery – In By Road - Bulk (Truck to Storage) - C
 
 
     Examples:
-      | tc_id      |
-      | LoginTest1 |
+      | tc_id |
+      | 7A |

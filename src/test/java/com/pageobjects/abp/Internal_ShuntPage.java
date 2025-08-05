@@ -4,9 +4,7 @@ import com.aventstack.extentreports.ExtentTest;
 import com.framework.report.Status;
 import com.framework.reusable.WebReusableComponents;
 import io.cucumber.java.en.Then;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import software.amazon.awssdk.services.ec2.model.Storage;
@@ -26,6 +24,7 @@ public class Internal_ShuntPage extends WebReusableComponents
     protected By Cargo = By.xpath("//span[normalize-space(text())='Cargo']");
     protected By Booking = By.xpath("//span[normalize-space(text())='Booking']");
     protected By downArrow = By.xpath("//i[@class='pi pi-fw pi-chevron-down ml-auto pr-2']");
+
     //#Step 29.1
     protected void CargoBookingShuntOrders() throws InterruptedException {
         Thread.sleep(3000);
@@ -43,6 +42,126 @@ public class Internal_ShuntPage extends WebReusableComponents
     {
         verifyPageHeaderTitle(ShuntordersTitle,"Shunt Order","Shunt Orders Page:");
     }
+
+    protected By ShuntAreaTable = By.xpath("//span[@data-column-name='name']");
+    protected By editBtn = By.xpath("//span[@class='text ng-binding' and text()='Edit']");
+    protected By completeBtn = By.xpath("//span[@class='text ng-binding' and text()='Complete']");
+    protected By returnBtn = By.xpath("//span[@class='text ng-binding' and text()='Return']");
+
+
+    protected void completeShuntorders() throws InterruptedException {
+        clickOnTableElementByValue(ShuntOrderNumber,ShuntAreaTable);
+
+        clickElement(editBtn);
+        Thread.sleep(3000);
+        clickElement(completeBtn);
+        Thread.sleep(3000);
+        clickElement(returnBtn);
+        Thread.sleep(3000);
+
+        clickElement(filterBtn);
+        Thread.sleep(2000);
+
+        clickElement(resetfilterBtn);
+        Thread.sleep(2000);
+
+        clickElement(addfilterBtn);
+        Thread.sleep(2000);
+
+        clickElement(orderstatus);
+        Thread.sleep(2000);
+
+        selectDropdownDD(selectorderstatus,"text","Equal");
+        Thread.sleep(2000);
+
+        selectDropdownDD(selectComplete,"text","Complete");
+        Thread.sleep(2000);
+
+        clickElement(applyfilterBtn);
+        Thread.sleep(5000);
+
+        printOrderAndMTDetails();
+    }
+
+    public void printOrderAndMTDetails() {
+        try {
+            // Find all elements for each data point
+            List<WebElement> orderNumbers = driver.findElements(
+                    By.xpath("//span[@data-column-name='name']")); // Added Order Number
+            List<WebElement> orderStatuses = driver.findElements(
+                    By.xpath("//span[@data-column-name='ordr.orderStatusDescription']"));
+            List<WebElement> requiredMTs = driver.findElements(
+                    By.xpath("//span[@data-column-name='requiredMT']"));
+            List<WebElement> remainingMTs = driver.findElements(
+                    By.xpath("//span[@data-column-name='remainingMT']"));
+            List<WebElement> deliveredWeights = driver.findElements(
+                    By.xpath("//span[@data-column-name='deliveredWeight']"));
+
+            System.out.println("Total order rows found: " + orderNumbers.size());
+
+            // Determine the number of rows to iterate, based on the smallest list size
+            int minSize = Math.min(orderNumbers.size(),
+                    Math.min(orderStatuses.size(),
+                            Math.min(requiredMTs.size(),
+                                    Math.min(remainingMTs.size(), deliveredWeights.size()))));
+
+            if (minSize == 0) { // Check if any data is found
+                String msg = "No order data found on the page.";
+                System.out.println(msg);
+                addTestLog(msg);
+                return; // Exit if no data is found
+            }
+
+            // Check for mismatched list sizes and log warnings
+            if (orderNumbers.size() != minSize || orderStatuses.size() != minSize ||
+                    requiredMTs.size() != minSize || remainingMTs.size() != minSize ||
+                    deliveredWeights.size() != minSize) {
+                String warning = "Warning: Mismatched number of elements for different data points. " +
+                        "Order Numbers: " + orderNumbers.size() +
+                        ", Order Statuses: " + orderStatuses.size() +
+                        ", Required MTs: " + requiredMTs.size() +
+                        ", Remaining MTs: " + remainingMTs.size() +
+                        ", Delivered Weights: " + deliveredWeights.size() +
+                        ". Iterating based on smallest list size (" + minSize + ").";
+                System.out.println(warning);
+                addTestLog(warning);
+            }
+
+            // --- Output Header ---
+            String header = String.format("| %-15s | %-18s | %-12s | %-14s | %-16s |",
+                    "ORDER NUMBER", "ORDER STATUS", "REQUIRED MT", "REMAINING MT", "DELIVERED WEIGHT");
+            String separator = "+-----------------+--------------------+--------------+----------------+------------------+";
+            System.out.println(separator);
+            System.out.println(header);
+            System.out.println(separator);
+            addTestLog("--- Order Details ---");
+
+            // Iterate through the elements and print their text
+            for (int i = 0; i < minSize; i++) {
+                String orderNumber = orderNumbers.get(i).getText();
+                String orderStatus = orderStatuses.get(i).getText();
+                String requiredMT = requiredMTs.get(i).getText();
+                String remainingMT = remainingMTs.get(i).getText();
+                String deliveredWeight = deliveredWeights.get(i).getText();
+
+                // Format each row neatly
+                String rowOutput = String.format("| %-15s | %-18s | %-12s | %-14s | %-16s |",
+                        orderNumber, orderStatus, requiredMT, remainingMT, deliveredWeight);
+                System.out.println(rowOutput);
+                addTestLog(rowOutput); // You might want to log each row separately or the whole block
+            }
+            System.out.println(separator); // Closing separator
+            addTestLog("--- End Order Details ---");
+
+        } catch (Exception e) {
+            String error = "An exception occurred while reading order table data: " + e.getMessage();
+            System.err.println(error); // Use System.err for errors
+            addTestLog("[Error] " + error);
+            e.printStackTrace(); // Print stack trace for debugging
+        }
+    }
+
+
     //Step 30.1
     protected By addunderShunt = By.id("ShuntOrder.Grid.add");
     protected void clickonaddONShuntpage(){ clickElement(addunderShunt);}
@@ -219,10 +338,10 @@ public class Internal_ShuntPage extends WebReusableComponents
         clickElement(sourceinputOrder);
         Thread.sleep(2000);
         //**Select Source By Drop down **//
-        selectDropdownDD(sourceinputOrder,"text","AUTOMATION AREA SALT-COMMON STOWAGE");
+        selectDropdownDD(sourceinputOrder,"text","AUTOMATION AREA SALT - Common Stowage");
         //selectDropdownDS(sourceinputOrder);
 
-        enterText(destinationinput,"AUTOMATION AREA - Salt - Common Stowage Group Internal Move - [SALT, Weight]");
+        enterText(destinationinput," AUTOMATION AREA - Salt - Common Stowage Group Internal Move");
         //commenting this selection and adding based on Index selection
         scrollIntoViewAndClick(destByIndex);
 
@@ -368,10 +487,44 @@ public class Internal_ShuntPage extends WebReusableComponents
         Tareweight = "14.000";
         enterDynamicNumericInput(Tarediv,TareInput,Tareweight);
         infoclicksSafeclicks();
-        clickElement(saveBtnR);
+        // *** As we are getting Truck override popup
+        handleSaveAndOverride();
 
         Thread.sleep(5000);
 
+    }
+    protected By overridepopup = By.xpath("//h1[@class='modal-header ng-binding ng-scope' and normalize-space(text())='Override Validations']");
+    protected By override_checkbox = By.id("form-component-ConfirmOverride");
+    protected By override_reason = By.id("form-component-ReasonOverride");
+    protected By override_confirmBtn = By.xpath("//span[@class='text ng-binding' and normalize-space(text())='Confirm']");
+
+    protected void overridepopuphandling()
+    {
+        setZoomLevel(50);
+        clickElement(override_checkbox);
+        enterText(override_reason,"test");
+        clickElement(override_confirmBtn);
+    }
+
+    public void handleSaveAndOverride() {
+        try {
+            // Perform clickOnSave function
+            clickElement(saveBtnR);
+
+            // Find the WebElement using the By locator
+            WebElement popupElement = driver.findElement(overridepopup);
+
+            // Check if override popup appears
+            waitUntilElementVisible(overridepopup,10);
+
+            if (popupElement.isDisplayed()) {
+                // If popup appears, handle it
+                overridepopuphandling();
+            }
+        } catch (NoSuchElementException | TimeoutException | StaleElementReferenceException e){
+            // If popup doesn't appear
+            System.out.println("Override popup doesn't appear, moving to next steps. Error: " + e.getMessage());
+        }
     }
 
     protected void UserEntersTruckBookinDetailsForConsignment() throws InterruptedException {
@@ -405,7 +558,7 @@ public class Internal_ShuntPage extends WebReusableComponents
         infoclicksSafeclicks();
 
         //Last Load
-        enterText(lastloadInput1,"peas");
+        enterText(lastloadInput1,"MAIZE");
         JSClick(lastloadIndexclick);
 
         enterText(lastloadMethodInput1,"Washed");
@@ -413,7 +566,7 @@ public class Internal_ShuntPage extends WebReusableComponents
         JSClick(lastloadIndexclick);
 
 
-        enterText(lastloadInput2,"peas");
+        enterText(lastloadInput2,"MAIZE");
         Thread.sleep(3000);
         JSClick(lastloadIndexclick);
 
@@ -422,7 +575,7 @@ public class Internal_ShuntPage extends WebReusableComponents
         Thread.sleep(3000);
         JSClick(lastloadIndexclick);
 
-        enterText(lastloadInput3,"peas");
+        enterText(lastloadInput3,"MAIZE");
         Thread.sleep(3000);
         JSClick(lastloadIndexclick);
 
@@ -567,14 +720,18 @@ public class Internal_ShuntPage extends WebReusableComponents
     //Step 40.1
     protected By viewcontentsBtn = By.xpath("//span[normalize-space(text())='View Contents']");
     protected By filterBtn = By.xpath("//button[@class='popup-toggle button-secondary']");
+    protected By resetfilterBtn = By.xpath("//span[normalize-space(text())='Reset']");
     protected By addfilterBtn = By.xpath("//button[contains(@class, 'filter-add-button')]");
     protected By area = By.xpath("(//button[normalize-space(text())='Area'])[1]");
+    protected By orderstatus = By.xpath("//button[normalize-space(text())='Order Status']");
+    protected By selectorderstatus = By.id("form-component-orderStatusDescriptionID-0-operator");
+    protected By selectComplete = By.id("form-component-orderStatusDescriptionID-0");
     protected By selectarea = By.id("form-component-sys.Name-0-operator");
     protected By areainput = By.xpath("//input[@id='form-component-sys.Name-0']");
     protected By applyfilterBtn = By.xpath("//button[contains(., 'Apply Filter')]");
     protected By pageselect = By.xpath("//select[@data-ng-model='clause.pageSize']");
 
-    protected void areaselection_Consignment() throws InterruptedException {
+    protected void areaselection_Consignment(String areaname) throws InterruptedException {
         clickElement(filterBtn);
         Thread.sleep(2000);
         clickElement(addfilterBtn);
@@ -583,13 +740,15 @@ public class Internal_ShuntPage extends WebReusableComponents
         Thread.sleep(2000);
         selectDropdownDD(selectarea,"text","Contains");
         Thread.sleep(2000);
-        enterText(areainput,"Consignment");
+        //enterText(areainput,"Consignment");
+        enterText(areainput,areaname);
         Thread.sleep(2000);
         clickElement(applyfilterBtn);
         Thread.sleep(2000);
 
 
-        clickOnArea("Consignment Internal Move");
+        //clickOnArea("Consignment Internal Move");
+        clickOnArea(areaname);
 
 
         Thread.sleep(2000);
@@ -599,7 +758,7 @@ public class Internal_ShuntPage extends WebReusableComponents
         printConsignmentAndMTValues();
 
     }
-    protected void areaselection_CommonStowage() throws InterruptedException {
+    protected void areaselection_CommonStowage(String areaname) throws InterruptedException {
         clickElement(filterBtn);
         Thread.sleep(2000);
         clickElement(addfilterBtn);
@@ -608,13 +767,15 @@ public class Internal_ShuntPage extends WebReusableComponents
         Thread.sleep(2000);
         selectDropdownDD(selectarea,"text","Contains");
         Thread.sleep(2000);
-        enterText(areainput,"Salt");
+        //enterText(areainput,"Salt");
+        enterText(areainput,areaname);
         Thread.sleep(2000);
         clickElement(applyfilterBtn);
         Thread.sleep(2000);
 
 
-        clickOnArea("Salt - Common Stowage Group Internal Move");
+        //clickOnArea("Salt - Common Stowage Group Internal Move");
+        clickOnArea(areaname);
 
 
         Thread.sleep(2000);
@@ -674,33 +835,51 @@ public class Internal_ShuntPage extends WebReusableComponents
 
             System.out.println("Total consignment rows found: " + consignmentNames.size());
 
+            // Determine the number of rows to iterate, based on the smallest list size
+            int minSize = Math.min(consignmentNames.size(), metricTonnes.size());
+
+            if (minSize == 0) {
+                String msg = "No consignment data found on the page.";
+                System.out.println(msg);
+                addTestLog(msg);
+                return; // Exit if no data is found
+            }
+
             if (consignmentNames.size() != metricTonnes.size()) {
                 String warning = "Warning: Mismatched number of Consignment Names and M/T values. " +
-                        "Consignments: " + consignmentNames.size() + ", M/T: " + metricTonnes.size();
+                        "Consignments: " + consignmentNames.size() +
+                        ", M/T: " + metricTonnes.size() +
+                        ". Iterating based on smallest list size (" + minSize + ").";
                 System.out.println(warning);
                 addTestLog(warning);
             }
 
-            for (int i = 0; i < consignmentNames.size(); i++) {
+            // --- Output Header ---
+            String header = String.format("| %-30s | %-15s |", "CONSIGNMENT NAME", "METRIC TONNES");
+            String separator = "+--------------------------------+-----------------+";
+            System.out.println(separator);
+            System.out.println(header);
+            System.out.println(separator);
+            addTestLog("--- Consignment Details ---");
+
+
+            for (int i = 0; i < minSize; i++) {
                 String consignmentName = consignmentNames.get(i).getText();
-                String metricTonneValue = i < metricTonnes.size() ? metricTonnes.get(i).getText() : "N/A";
+                String metricTonneValue = metricTonnes.get(i).getText(); // Always safe due to minSize
 
-                String logMessage = "Consignment: " + consignmentName + ", M/T Value: " + metricTonneValue;
-                System.out.println(logMessage);
-                addTestLog(logMessage);
+                // Format each row neatly
+                String rowOutput = String.format("| %-30s | %-15s |", consignmentName, metricTonneValue);
+                System.out.println(rowOutput);
+                addTestLog(rowOutput);
             }
-
-            if (consignmentNames.isEmpty()) {
-                String msg = "No consignment data found on the page.";
-                System.out.println(msg);
-                addTestLog(msg);
-            }
+            System.out.println(separator); // Closing separator
+            addTestLog("--- End Consignment Details ---");
 
         } catch (Exception e) {
             String error = "An exception occurred while reading table data: " + e.getMessage();
-            System.out.println(error);
-            addTestLog("[Error] " + error); // Correct usage
+            System.err.println(error); // Use System.err for errors
+            addTestLog("[Error] " + error);
+            e.printStackTrace(); // Print stack trace for debugging
         }
     }
-
 }
