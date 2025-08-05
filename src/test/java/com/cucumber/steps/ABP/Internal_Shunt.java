@@ -134,12 +134,14 @@ public class Internal_Shunt extends Internal_ShuntPage
     @When("the user enters shunt order quantity details for {int}A:")
     public void theUserEntersShuntOrderQuantityDetailsForA(int arg0) throws InterruptedException {
         String GW = testHarness.getData("Shunt_Data", "GlobalW");
+        //***Source & Destination area has to be changed. make as excel
         UserEntersShuntOrderQuantityDetailsFor_9A_TC(GW);
     }
     //Step 34 for 9B Test case --change in Storage Area. ****Area change ****
     @When("the user enters shunt order quantity details for {int}B:")
     public void theUserEntersShuntOrderQuantityDetailsForB(int arg0) throws InterruptedException {
         String GW = testHarness.getData("Shunt_Data", "GlobalW");
+        //**Source & Destination area has to be changed.
         UserEntersShuntOrderQuantityDetailsFor_9B_TC(GW);
     }
 
@@ -188,14 +190,19 @@ public class Internal_Shunt extends Internal_ShuntPage
     }
     //For 9B Storage Area
     @And("selects the Consignment Area")
-    public void selectsTheConsignmentArea() throws InterruptedException {
-        areaselection_Consignment();
-
+    public void selectsTheConsignmentArea() throws InterruptedException
+    {
+        String areaname = testHarness.getData("StorageArea", "AreaName");
+        System.out.println(areaname);
+        areaselection_Consignment(areaname);
     }
     //For 9A Storage Area
     @And("selects the Common Stowage Area")
-    public void selectsTheCommonStowageArea() throws InterruptedException {
-        areaselection_CommonStowage();
+    public void selectsTheCommonStowageArea() throws InterruptedException
+    {
+        String areaname = testHarness.getData("StorageArea", "AreaName");
+        System.out.println(areaname);
+        areaselection_CommonStowage(areaname);
     }
 
     //Step 40.1
@@ -204,4 +211,10 @@ public class Internal_Shunt extends Internal_ShuntPage
         allDischargedProducts();
     }
 
+    //** Step 41.3
+    @Then("complete the Shunt Order")
+    public void completeTheShuntOrder() throws InterruptedException
+    {
+        completeShuntorders();
+    }
 }

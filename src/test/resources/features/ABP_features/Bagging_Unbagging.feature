@@ -9,9 +9,9 @@ Feature: Bagging_Unbagging Steps (Review)
     Then CommTrac application Home page should be displayed
 
     # Step 40 --Verifying Before
-#    When the user navigate to Operations Storage Area
-#    And select the Storage Area
-#    Then all discharged product should be displayed in Storage Areas
+    When the user navigate to Operations Storage Area
+    And select the Storage Area
+    Then all discharged product should be displayed in Storage Areas
 
     # Step Bagging
 #    When the user navigate to Operations Bagging
